@@ -1,86 +1,44 @@
-﻿# DeepCaption
-# AI-Powered Image Caption Generator 
+# **DeepCaption: An AI-Powered Image Caption Generator**
 
-This image captioning project makes use of a ResNet-50 feature extractor, and an LSTM sequence processor to generate captions from images. It processes input images and text data to produce accurate and meaningful descriptions.
+This project tackles the challenging task of **image captioning** by combining a **ResNet-50 feature extractor** with an **LSTM-based sequence processor**. It is designed to generate accurate and descriptive text for a given image, bridging the gap between computer vision and natural language processing.
 
-#### _Reference - [Yumi's Blog](https://fairyonice.github.io/Develop_an_image_captioning_deep_learning_model_using_Flickr_8K_data.html)_
+The work is a deep learning approach inspired by **Yumi's Blog**.
 
-<br>
+### **Real-World Applications**
 
-### Project Workflow:
-1. Introduction
-2. Applications
-3. Prerequisites
-4. Data collection
-5. Understanding the data
-6. Text Cleaning
-7. Preparing the training and test set
-8. Image Preprocessing - Image Features Extraction using Transfer Learning (ResNet-50 Model)
-9. Preprocessing Captions
-10. Image Captioning as Supervised learning problem and data preparation using Generator Function
-11. Word Embeddings - Transfer Learning
-12. Model Architecture
-13. Model Training
-14. Making Predictions
-15. Conclusion
+The ability to automatically generate image captions has a wide range of practical applications:
 
-### 1. Introduction
-Caption generation is a challenging artificial intelligence problem where a textual description must be generated for a given photograph. Image captioning, i.e., describing the content observed in an image, has received a significant amount of attention in recent years. It requires both the methods - from computer vision to understand the content of the image and a language model from the field of natural language processing to turn the understanding of the image into words in the right order.
+* **Self-Driving Cars:** Captioning the environment around a vehicle can provide crucial context to its autonomous driving system.
+* **Assistive Technology:** Converting images to speech can assist the visually impaired, helping them navigate their surroundings more independently.
+* **Security & Surveillance:** Generating captions from CCTV footage could help in the automatic detection of suspicious or malicious activities, potentially reducing crime rates.
+* **Enhanced Web Search:** By generating captions for images, search engines could provide more precise results based on the image's content.
 
+***
 
-### 2. Applications
+### **Technical Breakdown**
 
-The main challenge of this task is to capture how objects relate to each other in the image and to express them in a natural language (like English). Some real world scenarios where Image Captioning plays a vital role are as follows :
+#### **1. Data Preparation**
+The model is trained using the **Flickr8K dataset**, a collection of 8,000 images, each with five distinct captions. The dataset is split into 6,000 images for training, 1,000 for validation, and 1,000 for testing. The raw data includes a file, `Flickr8k.token.txt`, which maps each image ID to its five captions.
 
-- Self driving cars — Automatic driving is one of the biggest challenges and if we can properly caption the scene around the car, it can give a boost to the self driving system.
-- Aid to the blind — We can create a product for the blind which will guide them travelling on the roads without the support of anyone else. We can do this by first converting the scene into text and then the text to voice. Both are now famous applications of Deep Learning.
-- CCTV cameras are everywhere today, but along with viewing the world, if we can also generate relevant captions, then we can raise alarms as soon as there is some malicious activity going on somewhere. This could probably help reduce some crime and/or accidents.
-- Automatic Captioning can help, make Google Image Search as good as Google Search, as then every image could be first converted into a caption and then search can be performed based on the caption.
- 
-### 3. Prerequisites
-Image captioning is an application of one to many type of RNNs. For a given input image model predicts the caption based on the vocabulary of train data using basic Deep Learning techniques. So familarity with concepts like Multi-layered Perceptrons, Convolution Neural Networks, Recurrent Neural Networks, Transfer Learning, Gradient Descent, Backpropagation, Overfitting, Probability, Text Processing, Python syntax and data structures, Keras library etc is necessary. Furthermore, libraries such as cv2, Numpy , keras with Tensorflow backend must be installed.
-I have considered the Flickr8k dataset - [Kaggle Flickr8k Dataset](https://www.kaggle.com/shadabhussain/flickr8k) for this project.
-### 4. Data Collection
-There are many open source datasets available for this problem, like Flickr 8k (It is a collection of 8 thousand described images taken from flickr.com), Flickr 30k (containing 30k images), MS COCO (containing 180k images), etc. But a good dataset to use when getting started with image captioning is the Flickr8K dataset. The reason is because it is realistic and relatively small so that we can download it and build models on our workstation using a CPU(preferably GPU). Flickr8k is a labeled dataset consisting of 8000 photos with 5 captions for each photos. It includes images obtained from the Flickr website.
-The images in this dataset are bifurcated as follows:
-- Training Set — 6000 images
-- Validation Set — 1000 images
-- Test Set — 1000 images
-### 5. Understanding the Data
-In the downloaded Flickr8k dataset, along with Images folder there would be a folder named 'Flickr_TextData' which contains some text files related to the images. One of the files in that folder is “Flickr8k.token.txt” which contains the name of each image along with its 5 captions.
+#### **2. Text Preprocessing**
+* **Cleaning**: The text is cleaned by converting all words to lowercase and removing punctuation, numbers, and special symbols. This reduces the vocabulary size and helps prevent overfitting. Stop words and stemming are deliberately not used, as they are crucial for generating natural and grammatically correct sentences.
+* **Vocabulary**: A vocabulary is built from the cleaned text, and words that appear less than 10 times are removed to make the model more robust to outliers. The vocabulary is then augmented with `'startseq'` and `'endseq'` tokens to signal the beginning and end of each caption, respectively.
 
-Thus every line contains the <image name>#i <caption>, where 0≤i≤4 , i.e. the name of the image, caption number (0 to 4) and the actual caption.
-  
-Firstly, we will create a dictionary named “descriptions” which contains the name of the image (without the .jpg extension) as keys and a list of the 5 captions for the corresponding image as values.
-  
-Before we proceed with text cleaning, lets visualize an image using Matplotlib library.
-  
-### 6. Text Cleaning
-When we deal with text, we generally perform some basic cleaning like lower-casing all the words (otherwise “hello” and “Hello” will be regarded as two separate words), remove special tokens or punctuation-marks (like ‘%’, ‘$’, ‘!’, etc.), eliminate words containing numbers (like ‘hey199’, etc.) and in some NLP tasks, we remove stopwords and perform stemming or lemmatization to get root form of the word before finally feeding our textual data to the model. In this project, while text cleaning :
+#### **3. Image Feature Extraction**
+Instead of building a CNN from scratch, the project uses **transfer learning** with a pre-trained **ResNet-50 model**. The last classification layer of the ResNet-50 model is removed, allowing the model to act as a feature extractor. Each image is converted into a **2048-dimensional feature vector** which captures its essential visual information.
 
-- Stop words have not been removed because if we don’t teach our model how to insert stop words like was, an, the, had , it would not generate correct english.
-- Stemming has not been performed because if we feed in stemmed words, the model is also going to learn those stemmed words . So for example, if the word is ‘running’ and we stem it and make it ‘run’ , the model will predict sentences like “Dog is run” instead of “Dog is running”.
-- All the text has been converted to lower case so that ‘the’ and ‘The’ are treated as the same words.
-- Numbers, Punctuations and special symbols like ‘@‘, ‘#’ and so on have been removed, so that we generate sentences without any punctuation or symbols. This is beneficial as it helps to reduce the vocabulary size. Small vocabulary size means less number of neurons and hence less parameters to be computed and hence less overfitting.
-  
-After text cleaning, write all these captions along with their image names in a new file namely, “descriptions.txt” and save it on the disk.
-  
-#### 6.1 Vocabulary Creation
-Next we will create a vocabulary of all the unique words present across all the 8000*5 (i.e. 40000) image captions in the dataset. Total unique words that are there in the dataset are 8424. However, many of these words will occur very few times , say 1, 2 or 3 times. Since it is a predictive sequential model, we would not like to have all the words present in our vocabulary but the words which are more likely to occur or which are common. This helps the model become more robust to outliers and make less mistakes. Hence a threshold has been chosen and if the frequency of the word is less than the threshold frequency (in our case the threshold value chosen is 10), then that particular word is omitted from the vocabulary set. Finally we store the words and their corresponding frequency in a sorted dictionary.
-After applying the frequency threshold filter, we get the vocabulary size as 1845 words (having frequency more than 10).
-  
-Later on, to this vocabulary, we will add two more tokens, namely 'startseq' and 'endseq'. The final vocab size will be total unique words + two extra tokens + 1 (for zero padding). 
-  
-### 7. Loading the Training Dataset
-The dataset also includes “Flickr_8k.trainImages.txt” file which contains the name of the images (or image ids) that belong to the training set. So we need to map these training image ids with the 5 captions corresponding to the image using 'descriptions.txt' file and store the mappings as a dictionary. Another important step while creating the train
-  dictionary is to add a __‘startseq’__ and __‘endseq’__ token in every caption, since RNN or LSTM based layers have been used for generating text. In such layers, the generation of text takes place such that the output of a previous unit acts as an input to the next unit. The model we will develop will generate a caption given a photo, and the caption will be generated one word at a time. The sequence of previously generated words will be provided as input. Therefore, we will need a ‘first word’ to kick-off the generation process and a ‘last word‘ to signal the end of the caption. Hence we need to specify a way which tells the model to stop generating words further. This is accomplished by adding two tokens in the captions i.e.
+#### **4. Word Embeddings**
+The captions are converted into numerical representations using **pre-trained GloVe word embeddings**. This eliminates the need to train a separate embedding layer from scratch and significantly reduces training time. The GloVe vectors (`glove.6B.50d.txt`) convert each word into a 50-dimensional vector.
 
-‘startseq’ -> This is a start sequence token which is added at the start of every caption.
-  
-‘endseq’ -> This is an end sequence token which is added at the end of every caption.
-  
-### 8. Image Pre-processing 
-Images are nothing but input X to our model. Any input to a machine or deep learning model must be given in the form of numbers/vectors Hence all the images have to be converted into a fixed size vector which can then be fed as input to a Neural Network. For this purpose, transfer learning has been used. We will use a pre-trained model provided by keras library to interpret the content of the photos.
+#### **5. Data Generation**
+The task is framed as a supervised learning problem where the model predicts the next word in a sequence given the image features and a partial caption. Due to the large size of the training data (over 3GB), a **custom Python generator function** is used to feed the model with data in batches. This approach prevents the entire dataset from being loaded into memory, making the training process much more efficient.
 
-#### 8.1 Transfer Learning
-Transfer learning is a research problem in machine learning (ML) that focuses on storing knowledge gained while solving one problem and applying it to a different but related problem. For example, knowledge gained while learning to recognize cars could apply when trying to recognize trucks. Transfer learning is popular in deep learning given the enormous resources required to train deep learning models or the large and challenging datasets on which deep learning models are trained. In transfer learning, we can leverage knowledge (
+#### **6. Model Architecture**
+The model is built using Keras's **Functional API** to handle the two distinct inputs (image features and text sequence). The architecture consists of:
+
+* **Photo Feature Extractor**: A Dense layer that processes the 2048-element image vector into a 256-element representation.
+* **Sequence Processor**: An Embedding layer (which is **frozen**) followed by a 256-unit **LSTM layer**.
+* **Decoder**: The outputs of the two branches are merged and processed by a Dense layer with a **softmax activation function** to predict the probability distribution for the next word in the caption.
+
+The model is trained using the **Adam optimizer** and **categorical cross-entropy loss**. A **30% dropout rate** is applied to reduce overfitting. The model learns to generate captions by predicting one word at a time, continuing until the `'endseq'` token is produced.
+
